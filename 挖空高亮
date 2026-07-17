@@ -1,0 +1,66 @@
+Sub ToggleClozeHighlight()
+    Dim rng As Range
+    Dim clozeColor As Long
+    Dim found As Boolean
+    
+    clozeColor = RGB(255, 255, 255) ' 纯白 = 挖空
+    
+    ' ==========================================
+    ' 判断：是否存在“高亮 + 白色字”
+    ' ==========================================
+    found = False
+    Set rng = ActiveDocument.Range
+    
+    With rng.Find
+        .ClearFormatting
+        .Text = ""
+        .Format = True
+        .Highlight = True
+        .Font.Color = clozeColor
+        If .Execute Then found = True
+    End With
+    
+    Set rng = ActiveDocument.Range
+    
+    If found Then
+        ' ==========================================
+        ' 已是挖空状态 → 恢复
+        ' ==========================================
+        With rng.Find
+            .ClearFormatting
+            .Text = ""
+            .Format = True
+            .Highlight = True
+            .Font.Color = clozeColor
+            
+            .Replacement.Text = ""
+            .Replacement.ClearFormatting
+            .Replacement.Font.Color = wdColorAutomatic
+            
+            .Wrap = wdFindContinue
+            .Execute Replace:=wdReplaceAll
+        End With
+        
+        MsgBox "已显示高亮内容", vbInformation
+        
+    Else
+        ' ==========================================
+        ' 正常状态 → 挖空
+        ' ==========================================
+        With rng.Find
+            .ClearFormatting
+            .Text = ""
+            .Format = True
+            .Highlight = True
+            
+            .Replacement.Text = ""
+            .Replacement.ClearFormatting
+            .Replacement.Font.Color = clozeColor
+            
+            .Wrap = wdFindContinue
+            .Execute Replace:=wdReplaceAll
+        End With
+        
+        MsgBox "已挖空高亮内容", vbInformation
+    End If
+End Sub
