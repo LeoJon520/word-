@@ -1,0 +1,57 @@
+Sub ToggleFadeNonHighlight()
+    Dim rng As Range
+    Dim isFaded As Boolean
+    
+    ' 先检测是否存在“非高亮且不是浅灰色”的文字
+    isFaded = True
+    Set rng = ActiveDocument.Range
+    
+    With rng.Find
+        .ClearFormatting
+        .Text = ""
+        .Format = True
+        .Highlight = False
+        .Font.Color = wdColorAutomatic   ' 找黑色（自动色）
+        
+        If .Execute Then isFaded = False
+    End With
+    
+    ' 根据状态切换
+    Set rng = ActiveDocument.Range
+    
+    If isFaded Then
+        ' 当前已是弱化状态 → 恢复
+        With rng.Find
+            .ClearFormatting
+            .Text = ""
+            .Format = True
+            .Highlight = False
+            .Font.Color = RGB(230, 230, 230)
+            
+            .Replacement.Text = ""
+            .Replacement.ClearFormatting
+            .Replacement.Font.Color = wdColorAutomatic
+            
+            .Wrap = wdFindContinue
+            .Execute Replace:=wdReplaceAll
+        End With
+        MsgBox "已恢复原文颜色", vbInformation
+    Else
+        ' 当前是正常状态 → 弱化非高亮
+        With rng.Find
+            .ClearFormatting
+            .Text = ""
+            .Format = True
+            .Highlight = False
+            .Font.Color = wdColorAutomatic
+            
+            .Replacement.Text = ""
+            .Replacement.ClearFormatting
+            .Replacement.Font.Color = RGB(230, 230, 230)
+            
+            .Wrap = wdFindContinue
+            .Execute Replace:=wdReplaceAll
+        End With
+        MsgBox "已弱化非高亮文字", vbInformation
+    End If
+End Sub
