@@ -1,0 +1,39 @@
+Sub ExtractHighlightedTextSafe()
+    Dim doc As Document
+    Dim rng As Range
+    Dim txt As String
+    Dim count As Long
+    
+    Set doc = ActiveDocument
+    Set rng = doc.Content
+    
+    With rng.Find
+        .ClearFormatting
+        .Highlight = True
+        .Text = ""
+        .Forward = True
+        .Wrap = wdFindStop
+        .Format = True
+        
+        Do While .Execute
+            txt = txt & rng.Text & vbCrLf
+            count = count + 1
+            
+            If count > doc.Characters.count Then Exit Do ' 防死循环
+            
+            rng.Collapse wdCollapseEnd
+            DoEvents
+        Loop
+    End With
+    
+    If Len(txt) > 0 Then
+        Dim path As String
+        path = CreateObject("WScript.Shell").SpecialFolders("Desktop") & "\高亮文本.txt"
+        Open path For Output As #1
+        Print #1, txt
+        Close #1
+        MsgBox "提取完成"
+    Else
+        MsgBox "未找到高亮文本"
+    End If
+End Sub
