@@ -1,51 +1,51 @@
 Sub ToggleClozeHighlight()
     Dim rng As Range
     Dim clozeColor As Long
-    Dim found As Boolean
+    Dim foundWhite As Boolean
     
-    clozeColor = RGB(255, 255, 255) ' 纯白 = 挖空
+    clozeColor = RGB(255, 255, 255)
     
     ' ==========================================
-    ' 判断：是否存在“高亮 + 白色字”
+    ' 判断：文档中是否存在“白色字”
+    ' （只要存在，就认为是挖空状态）
     ' ==========================================
-    found = False
+    foundWhite = False
     Set rng = ActiveDocument.Range
     
     With rng.Find
         .ClearFormatting
         .Text = ""
         .Format = True
-        .Highlight = True
         .Font.Color = clozeColor
-        If .Execute Then found = True
+        If .Execute Then foundWhite = True
     End With
     
     Set rng = ActiveDocument.Range
     
-    If found Then
+    If foundWhite Then
         ' ==========================================
-        ' 已是挖空状态 → 恢复
+        ' 【恢复】白色字 → 黑色 + 打开高亮
         ' ==========================================
         With rng.Find
             .ClearFormatting
             .Text = ""
             .Format = True
-            .Highlight = True
             .Font.Color = clozeColor
             
             .Replacement.Text = ""
             .Replacement.ClearFormatting
             .Replacement.Font.Color = wdColorAutomatic
+            .Replacement.Highlight = True
             
             .Wrap = wdFindContinue
             .Execute Replace:=wdReplaceAll
         End With
         
-        MsgBox "已显示高亮内容", vbInformation
+        MsgBox "已显示全部内容", vbInformation
         
     Else
         ' ==========================================
-        ' 正常状态 → 挖空
+        ' 【挖空】高亮文字 → 白色 + 关闭高亮
         ' ==========================================
         With rng.Find
             .ClearFormatting
@@ -56,6 +56,7 @@ Sub ToggleClozeHighlight()
             .Replacement.Text = ""
             .Replacement.ClearFormatting
             .Replacement.Font.Color = clozeColor
+            .Replacement.Highlight = False
             
             .Wrap = wdFindContinue
             .Execute Replace:=wdReplaceAll
